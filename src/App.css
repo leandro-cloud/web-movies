@@ -1,0 +1,94 @@
+body {
+  background-color: rgb(48, 48, 48);
+  color: white;
+  text-align: center;
+}
+/* Agregue un tema como medio oscuro no? */
+
+/* que color?  esta bien
+mas oscuro 
+ahi se ve bien. Si quiere hagamos otro meet por aparte
+https://meet.google.com/ywf-rjcs-wus
+*/
+
+h1 {
+  margin-bottom: 40px;
+}
+.movies {
+  display: flex;
+  flex-wrap: wrap;
+  
+}
+
+.movie{
+  flex: 0 0 33.3333%;
+  width: 100%;
+  max-width: 33.3333%;
+  position: relative;
+  height: 700px;
+ 
+}
+
+.movie-container {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  margin-bottom: 32px;
+}
+
+.movie-poster {
+  height: 500px;
+}
+
+.movie-action {
+  display: flex;
+  /* justify-content: space-between; */
+  flex-direction: column;
+  gap: 6px;
+}
+
+
+.movie-action {
+  display: flex;
+  justify-content: space-between;
+  overflow: hidden;
+  position: relative
+}
+
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center; 
+}
+
+.movie-action > button {
+  opacity: 0;
+}
+
+.movie-action:hover > button {
+  opacity: 1;
+}
+
+img {
+  height: 100%;
+}
+
+.modal {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
