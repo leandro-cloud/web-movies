@@ -1,90 +1,93 @@
 import { useState } from 'react'
 import './App.css'
 import moviesJson from './moviesJson.json'
+import { defaultPosterUrl, validateForm } from './logic/logic'
 
 function App() {
   const [movies, setMovies] = useState(moviesJson)
-  const [updating, setUpdating] = useState(false)
-  const [creating, setCreating] = useState(false)
+  const [editing, setEditing] = useState(null)
   const [movieToUpdate, setMovieToUpdate] = useState(null)
+  
 
   const handleDelete = (id) => {
-    const copyMovies = [...movies]
-    const newMovies = copyMovies.filter(movie => movie.id !== id)
+    const newMovies = movies.filter(movie => movie.id !== id)
     setMovies(newMovies)
   }
-
+  
   const handleUpdate = (e) => {
     e.preventDefault()
     const newMovies = [...movies]
-    const updatedMovie = newMovies.findIndex(movie => movie.id === movieToUpdate)
+    const updatedMovie = newMovies.findIndex(movie => movie.id === movieToUpdate.id)
     const fields = Object.fromEntries(new window.FormData(event.target))
-    if(fields.title === "" || fields.poster === "") {
-      setMovieToUpdate(null)
-      setUpdating(false)
-      return
-    }
-    newMovies[updatedMovie] = {id: movieToUpdate, ...fields}
+    const validatedMovie = validateForm(fields, movieToUpdate)
+    newMovies[updatedMovie] = validatedMovie
     setMovies(newMovies)
-    setMovieToUpdate(null)
-    setUpdating(false)
+    setEditing(null)
   }
 
   const handleCreate = (e) => {
     e.preventDefault()
     const fields = Object.fromEntries(new window.FormData(event.target))
-    if(fields.title === "" || fields.poster === "") {
-      setCreating(false)
+    if(fields.title === "") {
+      setEditing(null)
       return
     }
-    const newMovie = {
-      ...fields
-    }
-    const newMovies = [...movies, newMovie]
-    setMovies(newMovies)
-    setCreating(false)
+    setMovies([...movies, { id: crypto.randomUUID(), ...fields}])
+    setEditing(null)
   }
 
-  
-
+  const handlePosterError = (id) => {
+    setMovies((prevMovies) =>
+      prevMovies.map((movie) =>
+        movie.id === id ? { ...movie, poster: defaultPosterUrl } : movie
+   ))}
 
   return (
     <>
       <h1>Peliculas</h1>
-      <div className='row'>
-        {movies.map((movie, index) => (
-          <div key={index} className='col-lg-6 col-xl-4'>
-            <div className="movie-container">
-              <div className="movie-poster">
-                <img src={movie.poster} />
+      <div className='movies'>
+        {movies.map((movie) => (
+          <div key={movie.id} className="movie-container">
+            <div className="movie-poster">
+              <img src={movie.poster} alt={`${movie.title} poster`} onError={() => handlePosterError(movie.id)}/>
+            </div>
+            <div className="movie-action">
+              <div className='movie-details'>
+                <h4>{movie.title}</h4>
+                <p>{movie.director}</p>
+                <p>{movie.year}</p>
               </div>
-              <h4>{movie.title}</h4>
-              <div className="movie-action">
-                <button 
-                  onClick={() => {
-                    setUpdating(true)
-                    setMovieToUpdate(movie.id)
-                  }}>Modificar</button>
-                <button onClick={() => {handleDelete(movie.id)}}>Eliminar</button>
-              </div>
+              <button className='btn btn-primary'
+                onClick={() => {
+                  setEditing(true)
+                  setMovieToUpdate(movie)
+                }}>Modificar</button>
+              <button className='btn btn-danger'
+                onClick={() => {handleDelete(movie.id)}}
+              >
+                Eliminar
+              </button>
             </div>
           </div>
-        ))}
-        <button onClick={() => setCreating(true)}>Crear</button>      
-        
+        ))}             
         </div>
+        <div>
+          <button className='btn btn-primary' onClick={() => setEditing(false)}>Crear</button>  
+        </div> 
       
-      {(updating || creating) && (
+      {editing !== null && (
         <div className='modal'>
-          <form onSubmit={updating ? handleUpdate : handleCreate}>
-            <input className="form-control" type='text' name='title' placeholder='Nuevo nombre'/>
-            <input className="form-control" type='text' name='poster' placeholder='url' />
-            <button>{updating ? "Modificar" : "Crear"}</button>
+          <form onSubmit={editing === true ? handleUpdate : handleCreate}>
+            <input className="form-control" type='text' name='title' placeholder={editing === true ? movieToUpdate.title : "Nombre"} required={editing===false}/>
+            <input className="form-control" type='text' name='director' placeholder={editing === true ? movieToUpdate.director : "Director"} />
+            <input className="form-control" type='text' name='year' placeholder={editing === true ? movieToUpdate.year : "Año"} />
+            <input className="form-control" type='text' name='poster' placeholder="Imagen URL" />
+            <button className='btn btn-primary' type='submit'>{editing === true ? "Modificar" : "Crear"}</button>
+            <button className='btn btn-danger' onClick={(e) => {e.preventDefault()
+               setEditing(null) }}>Cancelar</button>
           </form>
         </div>
       )}
-
-
     </>
   )
 }
